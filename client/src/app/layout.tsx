@@ -20,8 +20,10 @@ export default function RootLayout({
 }>) {
   return (
     <html data-theme="aqua" lang="en" className={`${font.className} h-full antialiased bg-base-300 shadow-xl `}>
-      <Toaster  position="bottom-left" />
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <Toaster position="bottom-left" />
+        {children}
+      </body>
     </html>
   );
 }
