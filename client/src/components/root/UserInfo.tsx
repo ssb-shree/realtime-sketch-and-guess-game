@@ -1,6 +1,50 @@
-import React from "react";
+"use client";
 
-const UserInfo = () => {
+import { useUserStore } from "@/store/user";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import toast from "react-hot-toast";
+import { Socket } from "socket.io-client";
+
+const UserInfo = ({ socket }: { socket: Socket | null }) => {
+  const { roomID, setRoomID, username, setUsername } = useUserStore();
+
+  const router = useRouter();
+
+  const [errorMessage, setErrorMessage] = useState<string>();
+
+  const handleCreateRoom = () => {
+    // check for empty values
+    if (roomID.length < 4) {
+      setErrorMessage("roomID must be 4 char long");
+      toast.error("roomID must be 4 char long");
+      return;
+    }
+
+    if (username.length === 0) {
+      setErrorMessage("username cant be empty");
+      toast.error("username cant be empty");
+      return;
+    }
+
+    if (!socket) {
+      setErrorMessage("socket connection failed");
+      toast.error("socket connection failed");
+      return;
+    }
+
+    // check is roomID is taken
+    socket.emit("check-roomID-taken", { roomID });
+
+    socket.on("is-roomID-taken", (payload: any) => {
+      // either it will be a yes or no
+      // if no then return
+      // if yes the let the push happen
+    });
+
+    router.push(`/game/${roomID}?username=${username}`);
+  };
+
   return (
     <div className="md:w-[30%] border-2 rounded-3xl p-6 flex flex-col space-y-8 mt-10 md:mt-0">
       {/* Hero Text */}
@@ -16,17 +60,36 @@ const UserInfo = () => {
           <label htmlFor="username" className="text-sm">
             Name Yourself
           </label>
-          <input type="text" name="username" id="username" placeholder="Here Bredrin" className="input w-full" />
+          <input
+            type="text"
+            name="username"
+            id="username"
+            placeholder="Here Bredrin"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            className="input w-full"
+          />
         </div>
 
         {/* Room ID */}
         <div className="flex flex-col space-y-1">
           <label htmlFor="roomId">Create a Room ID</label>
-          <input type="text" name="roomId" id="roomId" className="input w-full" placeholder="6769"/>
+          <input
+            type="text"
+            name="roomId"
+            id="roomId"
+            className="input w-full"
+            placeholder="shreeB"
+            value={roomID}
+            onChange={(e) => setRoomID(e.target.value)}
+          />
         </div>
 
+        {/* Error Message  */}
+        {errorMessage && <span className="text-xs text-error text-center">{errorMessage}</span>}
+
         {/* Submit */}
-        <button type="submit" className="btn bg-base-100">
+        <button onClick={handleCreateRoom} type="button" className="btn bg-base-100">
           Start Game
         </button>
       </form>

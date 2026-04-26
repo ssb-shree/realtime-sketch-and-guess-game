@@ -1,6 +1,28 @@
-import React from "react";
+"use client";
 
-const RoomMenu = () => {
+import { Socket } from "socket.io-client";
+
+import { useEffect } from "react";
+
+const RoomMenu = ({ socket }: { socket: Socket | null }) => {
+  useEffect(() => {
+    // incase there is no socket connection provided dont emit or liste to events
+    if (!socket) return;
+
+    // get the room data and status
+    socket.emit("get-active-room-data", (payload: any) => console.log(payload));
+
+    // listen for room data updates and status
+    socket.on("update-active-room-data", (payload: any) => console.log(payload));
+
+    return () => {
+      // when this component unmounts close the socket connection
+      if (socket) {
+        socket.off("update-active-room-data");
+        socket.close();
+      }
+    };
+  }, [socket]);
   return (
     <div className="h-full w-full md:w-[70%] flex flex-col justify-start items-start p-2 ">
       <div className="mt-4 h-full w-full">
