@@ -1,13 +1,13 @@
 export type RoomType = {
   id: string;
-  players: string[];
-  owner: string;
+  players: PlayerType[];
+  owner: PlayerType;
   guessWord: string;
   canvasState: any;
   status: "started" | "waiting";
 };
 
-export type Player = {
+export type PlayerType = {
   id: string;
   username: string;
   score: number;
