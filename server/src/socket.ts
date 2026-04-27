@@ -44,7 +44,7 @@ io.on("connection", (socket) => {
 
       // if normal user remove from room
       room.players = room.players.filter((p) => p.id !== socket.id);
-      io.to(roomId).emit("user-left", {roomData : room});
+      io.to(roomId).emit("user-left", { roomData: room });
       handled = true;
     });
   });
@@ -72,6 +72,12 @@ io.on("connection", (socket) => {
       const alreadyExists = roomExist.players.find((p) => p.id === socket.id);
       if (alreadyExists) {
         return socket.emit("game-error", { message: `already joined rooom ${roomExist.id}` });
+      }
+
+      // check if a player with same username is already in room
+      const usernameTaken = roomExist.players.find((p) => p.username === username);
+      if (usernameTaken) {
+        return socket.emit("game-error", { message: "player with same username is already in room" });
       }
 
       // if not add the new player to the room
