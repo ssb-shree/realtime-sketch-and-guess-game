@@ -10,6 +10,8 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { Socket } from "socket.io-client";
 
+import { useUserStore } from "@/store/user";
+
 export type RoomType = {
   id: string;
   players: PlayerType[];
@@ -32,7 +34,10 @@ const GameRoom = () => {
   const searchParams = useSearchParams();
   const { roomID } = useParams<{ roomID: string }>();
 
+  const {setUsername} = useUserStore();
+
   const username = searchParams.get("username");
+  setUsername(username || "")
 
   // make a socket connection
   const socket = useSocket();
@@ -86,7 +91,7 @@ const GameRoom = () => {
   return (
     roomState && (
       <section className="min-h-screen md:h-screen w-screen flex flex-col md:flex-row justify-center items-center p-1">
-        <PlayerList socket={socket} playerList={roomState.players} />
+        <PlayerList socket={socket} roomData={roomState} />
         <Canvas socket={socket} roomData={roomState} />
         <ChatBox socket={socket} roomData={roomState} />
       </section>

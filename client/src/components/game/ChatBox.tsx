@@ -3,7 +3,7 @@
 import { RoomType } from "@/app/game/[roomID]/page";
 import { Socket } from "socket.io-client";
 
-const ChatBox = ({ socket, roomData }: { socket: Socket | null; roomData: RoomType }) => {
+const ChatBox = ({ socket, roomData }: { socket: Socket ; roomData: RoomType }) => {
   return (
     <div className="h-[40vh] md:h-[90%] w-full md:w-[30%] border-2 rounded-lg flex flex-col">
       <div className="h-full w-full p-1 overflow-y-scroll">text inside this div</div>

@@ -3,7 +3,7 @@
 import { RoomType } from "@/app/game/[roomID]/page";
 import { Socket } from "socket.io-client";
 
-const Canvas = ({ socket, roomData }: { socket: Socket | null; roomData: RoomType }) => {
+const Canvas = ({ socket, roomData }: { socket: Socket; roomData: RoomType }) => {
   return (
     <div className="h-full w-full md:w-[50%] p-1 flex flex-col justify-center items-center">
       <span>Word to be guessed here</span>
