@@ -14,6 +14,12 @@ const UserInfo = ({ socket }: { socket: Socket | null }) => {
   const [errorMessage, setErrorMessage] = useState<string>();
 
   const handleCreateRoom = () => {
+    if (!socket) {
+      setErrorMessage("socket connection failed");
+      toast.error("socket connection failed - userinfo");
+      return;
+    }
+
     // check for empty values
     if (roomID.length < 4) {
       setErrorMessage("roomID must be 4 char long");
@@ -27,22 +33,17 @@ const UserInfo = ({ socket }: { socket: Socket | null }) => {
       return;
     }
 
-    if (!socket) {
-      setErrorMessage("socket connection failed");
-      toast.error("socket connection failed");
-      return;
-    }
-
     // check is roomID is taken
     socket.emit("check-roomID-taken", { roomID });
 
-    socket.on("is-roomID-taken", (payload: any) => {
-      // either it will be a yes or no
-      // if no then return
-      // if yes the let the push happen
-    });
+    socket.once("is-roomID-taken", ({ taken }: { taken: boolean }) => {
+      if (taken) {
+        toast.error("roomID is already in use by other players");
+        return;
+      }
 
-    router.push(`/game/${roomID}?username=${username}`);
+      router.push(`/game/${roomID}?username=${username}`);
+    });
   };
 
   return (
