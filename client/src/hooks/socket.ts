@@ -2,20 +2,13 @@ import { initSocket } from "@/services/socket";
 import { useEffect, useRef } from "react";
 import { Socket } from "socket.io-client";
 
+let socket: Socket | null = null;
+
 export const useSocket = () => {
-  const socketRef = useRef<Socket | null>(null);
+  if (socket) {
+    return socket;
+  }
 
-  useEffect(() => {
-    socketRef.current = initSocket();
-
-    return () => {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-      }
-
-      socketRef.current = null;
-    };
-  }, [socketRef]);
-
-  return socketRef.current;
+  socket = initSocket();
+  return socket;
 };

@@ -4,6 +4,7 @@ import UserInfo from "@/components/root/UserInfo";
 import RoomMenu from "@/components/root/RoomMenu";
 
 import { useSocket } from "@/hooks/socket";
+import { useEffect } from "react";
 
 const Rootpage = () => {
   const socket = useSocket();
