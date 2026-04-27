@@ -34,10 +34,9 @@ const GameRoom = () => {
   const searchParams = useSearchParams();
   const { roomID } = useParams<{ roomID: string }>();
 
-  const {setUsername} = useUserStore();
+  const { setUsername } = useUserStore();
 
   const username = searchParams.get("username");
-  setUsername(username || "")
 
   // make a socket connection
   const socket = useSocket();
@@ -46,6 +45,8 @@ const GameRoom = () => {
 
   useEffect(() => {
     if (!socket) return;
+
+    setUsername(username || "");
 
     return () => {
       socket.emit("leave-room", { roomID });
@@ -75,7 +76,7 @@ const GameRoom = () => {
 
     socket.on("game-error", ({ message }: { message: string }) => {
       toast.error(message);
-      socket.emit("leave-room")
+      socket.emit("leave-room");
       router.push("/");
     });
 
@@ -84,7 +85,7 @@ const GameRoom = () => {
       socket.off("update-room-data");
       socket.off("user-left");
 
-      socket.emit("leave-room")
+      socket.emit("leave-room");
     };
   }, [socket, username, roomID]);
 
