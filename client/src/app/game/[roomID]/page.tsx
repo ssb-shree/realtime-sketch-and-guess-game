@@ -1,4 +1,7 @@
 "use client";
+import Canvas from "@/components/game/Canvas";
+import ChatBox from "@/components/game/ChatBox";
+import PlayerList from "@/components/game/PlayerList";
 import { useSocket } from "@/hooks/socket";
 
 import { useRouter, useSearchParams } from "next/navigation";
@@ -40,10 +43,9 @@ const GameRoom = () => {
     if (!socket) return;
 
     return () => {
-      console.log("user left page 2");
       socket.emit("leave-room", { roomID });
     };
-  }, []); // <-- only once
+  }, []);
 
   useEffect(() => {
     if (!socket) {
@@ -66,41 +68,29 @@ const GameRoom = () => {
       setRoomState(roomData);
     });
 
+    socket.on("game-error", ({ message }: { message: string }) => {
+      toast.error(message);
+      socket.emit("leave-room")
+      router.push("/");
+    });
+
     return () => {
       socket.off("room-joined");
       socket.off("update-room-data");
       socket.off("user-left");
+
+      socket.emit("leave-room")
     };
   }, [socket, username, roomID]);
 
   return (
-    <section className="min-h-screen md:h-screen w-screen flex flex-col md:flex-row justify-center items-center p-1">
-      <div className="h-full w-full md:w-[20%] p-1 flex flex-col justify-center items-center gap-y-2 overflow-y-scroll overflow-x-hidden">
-        <span>Active Players : {roomState?.players.length || 0}</span>
-        {roomState &&
-          roomState.players.map((user) => (
-            <div
-              key={user.username}
-              className="w-full text-left flex flex-row justify-between items-center border p-1 rounded-full"
-            >
-              <span className="ml-2">{user.username}</span>
-              <span className="mr-1">{user.score}</span>
-            </div>
-          ))}
-      </div>
-      <div className="h-full w-full md:w-[50%] p-1 flex flex-col justify-center items-center">
-        <span>Word to be guessed here</span>
-        <div className="h-[60vh] md:h-[80%] w-full bg-white rounded-3xl"></div>
-      </div>
-      <div className="h-[40vh] md:h-[90%] w-full md:w-[30%] border-2 rounded-lg flex flex-col">
-        <div className="h-full w-full p-1 overflow-y-scroll">text inside this div</div>
-
-        {/* input */}
-        <div className="p-2 border-t bottom-0">
-          <input type="text" placeholder="Type..." className="input input-bordered w-full" />
-        </div>
-      </div>
-    </section>
+    roomState && (
+      <section className="min-h-screen md:h-screen w-screen flex flex-col md:flex-row justify-center items-center p-1">
+        <PlayerList socket={socket} playerList={roomState.players} />
+        <Canvas socket={socket} roomData={roomState} />
+        <ChatBox socket={socket} roomData={roomState} />
+      </section>
+    )
   );
 };
 
