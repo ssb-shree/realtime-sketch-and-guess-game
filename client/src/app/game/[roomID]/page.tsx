@@ -11,14 +11,19 @@ import toast from "react-hot-toast";
 import { Socket } from "socket.io-client";
 
 import { useUserStore } from "@/store/user";
+import { LineType } from "@/components/KonvaCanvas";
 
 export type RoomType = {
   id: string;
   players: PlayerType[];
   owner: PlayerType;
-  guessWord: string;
-  canvasState: any;
-  status: "started" | "waiting";
+  currentWord: string;
+  guessedPlayers: Set<string>; // socket ID
+  toTakeTurn: PlayerType[]; // socket ID's
+  turnIndex: number;
+  scores: Record<string, number>;
+  canvasState: LineType[];
+  status: "started" | "waiting" | "ended";
 };
 
 export type PlayerType = {
@@ -50,6 +55,8 @@ const GameRoom = () => {
 
     return () => {
       socket.emit("leave-room", { roomID });
+
+      console.log("from page.tsx 1 ")
     };
   }, []);
 
@@ -76,7 +83,12 @@ const GameRoom = () => {
 
     socket.on("game-error", ({ message }: { message: string }) => {
       toast.error(message);
-      socket.emit("leave-room");
+      socket.emit("leave-room", "from on game error");
+      router.push("/");
+    });
+
+    socket.on("room-deleted", () => {
+      toast.error("Room got deletd");
       router.push("/");
     });
 
@@ -85,9 +97,12 @@ const GameRoom = () => {
       socket.off("update-room-data");
       socket.off("user-left");
 
-      socket.emit("leave-room");
+      socket.emit("leave-room", "from page.tsx 2nd use effect");
+
+      console.log("from page.tsx 2 ")
+
     };
-  }, [socket, username, roomID]);
+  }, [socket, roomID]);
 
   return (
     roomState && (
