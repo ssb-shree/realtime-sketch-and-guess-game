@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 import { useUserStore } from "@/store/user";
+import toast from "react-hot-toast";
 
 const PlayerList = ({ socket, roomData }: { socket: Socket; roomData: RoomType }) => {
   const { username } = useUserStore();
@@ -26,6 +27,11 @@ const PlayerList = ({ socket, roomData }: { socket: Socket; roomData: RoomType }
   };
 
   const startGame = () => {
+
+    // check if there are more than 3 players to emit the event
+    if(roomData.players.length < 3){
+      return toast.error("there should atleast be 3 players")
+    }
     socket.emit("start-game", {roomID : roomData.id});
   };
 
