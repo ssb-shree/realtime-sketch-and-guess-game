@@ -15,7 +15,7 @@ type CanvasProps = {
   backgroundColor?: string;
   disabled?: boolean;
   onChange?: (lines: LineType[]) => void;
-  externalState?: LineType[]; // for updateState
+  externalState?: LineType[];
 };
 
 const KonvaCanvas = ({
@@ -28,16 +28,28 @@ const KonvaCanvas = ({
 }: CanvasProps) => {
   const [lines, setLines] = useState<LineType[]>([]);
   const isDrawing = useRef(false);
+  const isExternalUpdate = useRef(false);
 
   const WIDTH = 800;
   const HEIGHT = 500;
 
-  // 🔄 update from external state
+  // external updates (from socket)
   useEffect(() => {
     if (externalState) {
+      isExternalUpdate.current = true;
       setLines(externalState);
     }
   }, [externalState]);
+
+  // emit changes AFTER render
+  useEffect(() => {
+    if (isExternalUpdate.current) {
+      isExternalUpdate.current = false;
+      return;
+    }
+
+    onChange?.(lines);
+  }, [lines]);
 
   const handleMouseDown = (e: any) => {
     if (disabled) return;
@@ -55,17 +67,16 @@ const KonvaCanvas = ({
     const point = stage.getPointerPosition();
 
     setLines((prev) => {
+      if (prev.length === 0) return prev;
+
       const lastLine = prev[prev.length - 1];
+
       const updatedLine = {
         ...lastLine,
         points: [...lastLine.points, point.x, point.y],
       };
 
-      const newLines = [...prev.slice(0, -1), updatedLine];
-
-      onChange?.(newLines); // 🔥 emit state
-
-      return newLines;
+      return [...prev.slice(0, -1), updatedLine];
     });
   };
 
