@@ -154,6 +154,21 @@ io.on("connection", (socket) => {
     rooms.delete(room.id);
   }
 
+  const BREAK_TIME = 5_000; // 5 seconds of "here's who's winning, cope"
+
+  function startBreak(io: Server, room: RoomType, word : string) {
+    io.to(room.id).emit("show-scores", {
+      word,
+      scores: room.scores,
+      nextDrawer: room.toTakeTurn[room.turnIndex + 1]?.username ?? null, // null = last turn, game ending
+    });
+
+    setTimeout(() => {
+      room.turnIndex++;
+      nextTurn(io, room);
+    }, BREAK_TIME);
+  }
+
   // ─── the heart of the game loop — called at the start of every turn ───
   function nextTurn(io: Server, room: RoomType) {
     const TURN_TIME = 60_000; // 60 seconds per turn
@@ -188,7 +203,7 @@ io.on("connection", (socket) => {
       io.to(room.id).emit("turn-ended", { word, scores: room.scores });
 
       room.turnIndex++;
-      nextTurn(io, room); // recurse → starts the next person's turn
+      startBreak(io, room, word);
     }, TURN_TIME);
   }
 
