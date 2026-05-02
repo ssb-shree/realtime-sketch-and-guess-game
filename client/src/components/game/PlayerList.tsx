@@ -26,7 +26,7 @@ const PlayerList = ({ socket, roomData }: { socket: Socket; roomData: RoomType }
   };
 
   const startGame = () => {
-    socket.emit("start-game");
+    socket.emit("start-game", {roomID : roomData.id});
   };
 
   return (
